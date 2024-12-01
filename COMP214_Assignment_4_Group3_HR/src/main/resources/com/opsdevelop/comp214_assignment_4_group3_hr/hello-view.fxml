@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<TabPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171"
+         fx:controller="com.opsdevelop.comp214_assignment_4_group3_hr.HelloController">
+    <!-- Hire Employee form Tab -->
+    <Tab text="Hire Employee Form">
+        <VBox alignment="TOP_CENTER" spacing="20.0">
+
+            <padding>
+                <Insets left="20" right="20"  top="20" bottom="20"/>
+            </padding>
+
+
+            <GridPane alignment="BASELINE_CENTER" >
+                <Label text="EMPLOYEE HIRING FORM" style="-fx-font-weight: bold; -fx-text-fill: black;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            </GridPane>
+
+            <Separator />
+
+            <GridPane hgap="20" vgap="10" alignment="TOP_LEFT" >
+
+                <!-- Define width of each column as a percentage-->
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="13"/>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="10"/>
+                    <ColumnConstraints percentWidth="23"/>
+                    <ColumnConstraints percentWidth="11"/>
+                    <ColumnConstraints percentWidth="23"/>
+                </columnConstraints>
+
+
+                <Label text="First Name:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <TextField fx:id="registerFirstNameField" promptText="Enter First Name" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="Last Name:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+                <TextField fx:id="registerLastNameField" promptText="Enter Last Name" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                <Label text="Email:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="4" />
+                <TextField fx:id="registerEmailField" promptText="Enter Email" GridPane.rowIndex="0" GridPane.columnIndex="5"/>
+
+
+                <Label text="Phone Number:" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <TextField fx:id="registerPhoneNumberField" promptText="Enter Phone Number" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Hire date:" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2" />
+                <DatePicker fx:id="registerHireDatePicker" promptText="Enter Hire date" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                <Label text="Salary:" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="4" />
+                <TextField fx:id="registerSalaryField" promptText="Enter Salary" GridPane.rowIndex="1" GridPane.columnIndex="5"/>
+
+
+                <Label text="Job:" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="employeeJobComboBox" prefWidth="200"  promptText="Please select ..." GridPane.rowIndex="2" GridPane.columnIndex="1" />
+                <Label text="Manager:" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                <ComboBox fx:id="employeeManagerComboBox" prefWidth="200"  promptText="Please select ..." GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+                <Label text="Department:" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="4"/>
+                <ComboBox fx:id="employeeDepartmentComboBox" prefWidth="200"  promptText="Please select ..." GridPane.rowIndex="2" GridPane.columnIndex="5"/>
+
+            </GridPane>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="Hire" onAction="#onSubmitHireEmployeeForm"/>
+                <Button text="Clear" onAction="#onClearHireEmployeeForm"/>
+                <Button text="Cancel" onAction="#onCancelHireEmployeeForm"/>
+            </HBox>
+        </VBox>
+    </Tab>
+
+    <!-- Employees List Tab -->
+    <Tab text="Employees list" onSelectionChanged="#onEmployeesListTabSelected">
+        <VBox spacing="20" alignment="CENTER">
+
+            <padding>
+                <Insets left="20" right="20"  top="20" bottom="20"/>
+            </padding>
+            <HBox spacing="10">
+                <Label text="Filter by Employee ID:" />
+                <TextField fx:id="filterEmployeeIdField" promptText="Enter Player ID" />
+                <Button text="Filter" onAction="#onFilterEmployee" />
+                <Button text="Restart" onAction="#onFilterEmployeeRestart" />
+            </HBox>
+            <TableView fx:id="employeeTable">
+                <columns>
+                    <TableColumn text="Employee ID" fx:id="employeeIdColumn" prefWidth="100" />
+                    <TableColumn text="First Name" fx:id="firstNameColumn" prefWidth="150"/>
+                    <TableColumn text="Last Name" fx:id="lastNameColumn" prefWidth="150" />
+                    <TableColumn text="Email" fx:id="emailColumn" prefWidth="150"/>
+                    <TableColumn text="Phone Number" fx:id="phoneNumberColumn" prefWidth="150" />
+                    <TableColumn text="Hire Date" fx:id="hireDateColumn" prefWidth="150" />
+                    <TableColumn text="Salary" fx:id="salaryColumn" prefWidth="150" />
+                    <TableColumn text="Job" fx:id="jobColumn" prefWidth="150" />
+                    <TableColumn text="Manager" fx:id="managerColumn" prefWidth="150" />
+                    <TableColumn text="Department" fx:id="departmentColumn" prefWidth="150" />
+                </columns>
+            </TableView>
+        </VBox>
+    </Tab>
+
+
+    <!-- Register Job Tab -->
+    <Tab text="Job Register Form">
+        <VBox spacing="20" alignment="TOP_LEFT">
+
+            <padding>
+                <Insets left="20" right="20"  top="20" bottom="20"/>
+            </padding>
+
+            <GridPane alignment="TOP_CENTER" >
+                <Label text="JOB REGISTER FORM" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            </GridPane>
+
+            <GridPane hgap="2" vgap="10" alignment="TOP_LEFT" >
+
+                <!-- Define width of each column as a percentage-->
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="80"/>
+                </columnConstraints>
+
+                <Label text="ID:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <TextField fx:id="registerJobIdField" promptText="Enter Job ID" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="Title:" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <TextField fx:id="registerJobTitleField" promptText="Enter Job title" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Min Salary:" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                <TextField fx:id="registerMinSalaryField" promptText="Enter Job Min Salary" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                <Label text="Max Salary:" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+                <TextField fx:id="registerMaxSalaryField" promptText="Enter Job Max Salary" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="Register" onAction="#onSubmitJobForm"/>
+                <Button text="Clear" onAction="#onClearJobForm"/>
+            </HBox>
+        </VBox>
+    </Tab>
+
+    <!-- Job Description Search Tab -->
+    <Tab text="Job description search">
+        <VBox spacing="20" alignment="TOP_LEFT">
+
+            <padding>
+                <Insets left="20" right="20"  top="20" bottom="20"/>
+            </padding>
+
+            <HBox spacing="10">
+                <Label text="Job ID:" />
+                <TextField fx:id="jobIdField" promptText="Enter Job ID" />
+                <Button text="Search" onAction="#onGetDescription" />
+            </HBox>
+
+            <HBox spacing="10">
+                <Label text="Job Description:" />
+                <TextField fx:id="jobDescriptionField" editable="false"  />
+            </HBox>
+        </VBox>
+    </Tab>
+
+
+    <!-- Jobs List Tab -->
+    <Tab text="Jobs list" onSelectionChanged="#onJobsListTabSelected">
+        <VBox spacing="20" alignment="TOP_LEFT">
+
+            <padding>
+                <Insets left="20" right="20"  top="20" bottom="20"/>
+            </padding>
+            <HBox spacing="10">
+                <Label text="Filter by Job ID:" />
+                <TextField fx:id="filterJobIdField" promptText="Enter Player ID" />
+                <Button text="Filter" onAction="#onFilterJob" />
+                <Button text="Restart" onAction="#onFilterJobRestart" />
+            </HBox>
+            <TableView fx:id="jobsTable">
+                <columns>
+                    <TableColumn text="Job ID" fx:id="jobIdColumn" prefWidth="200" />
+                    <TableColumn text="Job Title" fx:id="jobTitleColumn" prefWidth="310"/>
+                    <TableColumn text="Min Salary" fx:id="minSalaryColumn" prefWidth="150" />
+                    <TableColumn text="Max Salary" fx:id="maxSalaryColumn" prefWidth="150"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </Tab>
+
+</TabPane>
