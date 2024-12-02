@@ -18,7 +18,10 @@ public class Job {
 
     // Getters
     public String getJobId() { return jobId; }
+    public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
     public String getJobTitle() { return jobTitle; }
+    public void setMinSalary(int minSalary) { this.minSalary = minSalary; }
     public int getMinSalary() { return minSalary; }
+    public void setMaxSalary(int maxSalary) { this.maxSalary = maxSalary; }
     public int getMaxSalary() { return maxSalary; }
 }

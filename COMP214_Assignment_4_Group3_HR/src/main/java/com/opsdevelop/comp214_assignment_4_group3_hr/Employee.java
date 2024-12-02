@@ -34,10 +34,13 @@ public class Employee {
     public int getEmployeeId() { return employeeId; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
+    public void setEmail(String email) { this.email = email; }
     public String getEmail() { return email; }
+    public void setPhoneNumber(String phone) { this.phone = phone; }
     public String getPhone() { return phone; }
     public Date getHireDate() { return hireDate; }
     public String getJob() { return job; }
+    public void setSalary(int salary) { this.salary = salary; }
     public int getSalary() { return salary; }
     public String getManager() { return manager; }
     public String getDepartment() { return department; }

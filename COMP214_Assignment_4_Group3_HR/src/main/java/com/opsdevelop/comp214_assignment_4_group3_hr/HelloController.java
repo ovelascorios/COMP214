@@ -19,9 +19,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.converter.IntegerStringConverter;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.Arrays;
 
 public class HelloController {
 
@@ -37,6 +40,11 @@ public class HelloController {
     @FXML
     private ComboBox<String> employeeJobComboBox,employeeManagerComboBox,employeeDepartmentComboBox;
 
+    @FXML
+    private ComboBox<String> updateJobComboBox,updateManagerComboBox,updateDepartmentComboBox;
+
+    @FXML
+    private TextField updateSalaryField;
 
     @FXML
     private TextField registerJobIdField, registerJobTitleField, registerMinSalaryField, registerMaxSalaryField;
@@ -51,9 +59,9 @@ public class HelloController {
     @FXML
     private TableColumn<Job, String> jobTitleColumn;
     @FXML
-    private TableColumn<Job, String> minSalaryColumn;
+    private TableColumn<Job, Integer> minSalaryColumn;
     @FXML
-    private TableColumn<Job, String> maxSalaryColumn;
+    private TableColumn<Job, Integer> maxSalaryColumn;
 
     @FXML
     private TableView<Employee> employeeTable;
@@ -82,11 +90,14 @@ public class HelloController {
     private Connection dbConnection;
 
 
-    // ObservableLists to hold player and game data.
+    // ObservableLists to hold job, manager and department data.
     private ObservableList<String> jobList = FXCollections.observableArrayList();
     private ObservableList<String> managerList = FXCollections.observableArrayList();
     private ObservableList<String> departmentList = FXCollections.observableArrayList();
 
+    private ObservableList<String> updateJobList = FXCollections.observableArrayList();
+    private ObservableList<String> updateManagerList = FXCollections.observableArrayList();
+    private ObservableList<String> updateDepartmentList = FXCollections.observableArrayList();
 
     // Constructor for HelloController
     public HelloController() {
@@ -107,12 +118,21 @@ public class HelloController {
         loadJobs();
         loadManagers();
         loadDepartments();
+        loadUpdateJobs();
+        loadUpdateManagers();
+        loadUpdateDepartments();
         registerHireDatePicker.setValue(LocalDate.now());
 
         // Set the items for combo boxes using the loaded lists
         employeeJobComboBox.setItems(jobList);
         employeeManagerComboBox.setItems(managerList);
         employeeDepartmentComboBox.setItems(departmentList);
+
+
+        // Set the items for combo boxes using the update loaded lists
+        updateJobComboBox.setItems(updateJobList);
+        updateManagerComboBox.setItems(updateManagerList);
+        updateDepartmentComboBox.setItems(updateDepartmentList);
 
 
         // Set up TableView columns
@@ -131,12 +151,95 @@ public class HelloController {
         minSalaryColumn.setCellValueFactory(new PropertyValueFactory<>("minSalary"));
         maxSalaryColumn.setCellValueFactory(new PropertyValueFactory<>("maxSalary"));
 
+        // Make the SALARY column editable
+        salaryColumn.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        salaryColumn.setOnEditCommit(event -> {
+            Employee employee = event.getRowValue();
+            int newSalary = event.getNewValue();
+            int employeeId = employee.getEmployeeId();
+
+            // Update the model
+            employee.setSalary(newSalary);
+
+            // Update the database
+            updateDatabaseEmployeesTable("Salary", newSalary, employeeId);
+        });
+
+        // Make the PHONE column editable
+        phoneNumberColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        phoneNumberColumn.setOnEditCommit(event -> {
+            Employee employee = event.getRowValue();
+            String newPhone = event.getNewValue();
+            int employeeId = employee.getEmployeeId();
+
+            // Update the model
+            employee.setPhoneNumber(newPhone);
+
+            // Update the database
+            updateDatabaseEmployeesTable("Phone_Number", newPhone, employeeId);
+        });
+
+        // Make the EMAIL column editable
+        emailColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        emailColumn.setOnEditCommit(event -> {
+            Employee employee = event.getRowValue();
+            String newEmail = event.getNewValue();
+            int employeeId = employee.getEmployeeId();
+
+            // Update the model
+            employee.setEmail(newEmail);
+
+            // Update the database
+            updateDatabaseEmployeesTable("Email", newEmail, employeeId);
+        });
+
+        // Make JOB_TITLE column editable
+        jobTitleColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        jobTitleColumn.setOnEditCommit(event -> {
+            Job job = event.getRowValue();
+            String newTitle = event.getNewValue();
+            String jobId = job.getJobId();
+
+            // Update the model
+            job.setJobTitle(newTitle);
+
+            // Update the database
+            updateDatabaseJobsTable("job_title", newTitle, jobId);
+        });
+
+        // Make MIN_SALARY column editable
+        minSalaryColumn.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        minSalaryColumn.setOnEditCommit(event -> {
+            Job job = event.getRowValue();
+            int newMinSalary = event.getNewValue();
+            String jobId = job.getJobId();
+
+            // Update the model
+            job.setMinSalary(newMinSalary);
+
+            // Update the database
+            updateDatabaseJobsTable("min_salary", newMinSalary, jobId);
+        });
+
+        // Make MAX_SALARY column editable
+        maxSalaryColumn.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        maxSalaryColumn.setOnEditCommit(event -> {
+            Job job = event.getRowValue();
+            int newMaxSalary = event.getNewValue();
+            String jobId = job.getJobId();
+
+            // Update the model
+            job.setMaxSalary(newMaxSalary);
+
+            // Update the database
+            updateDatabaseJobsTable("max_salary", newMaxSalary, jobId);
+        });
 
     }
 
     // Method to load Jobs from the database and populate the job list
     private void loadJobs() {
-        jobList.clear(); // Clear any existing data in the player list
+        jobList.clear(); // Clear any existing data in the job list
         try {
             String query = "SELECT job_id, job_title FROM hr_jobs order by 1 asc";
             PreparedStatement stmt = dbConnection.prepareStatement(query);
@@ -154,9 +257,32 @@ public class HelloController {
         }
     }
 
+
+    // Method to load Jobs from the database and populate the job list
+    private void loadUpdateJobs() {
+        updateJobList.clear();
+        updateJobList.add("All");
+        try {
+            String query = "SELECT job_id, job_title FROM hr_jobs order by 1 asc";
+            PreparedStatement stmt = dbConnection.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            // Process each player returned from the query
+            while (rs.next()) {
+                String jobId = rs.getString("job_id");
+                String jobTitle = rs.getString("job_title") ;
+                updateJobList.add(jobId + " - " + jobTitle);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error in loading players: " + e.getMessage());
+        }
+    }
+
+
     // Method to load Managers from the database and populate the manager list
     private void loadManagers() {
-        managerList.clear(); // Clear any existing data in the player list
+        managerList.clear(); // Clear any existing data in the manager list
         try {
             String query = "SELECT employee_id, first_name, last_name FROM hr_employees order by 1 asc";
             PreparedStatement stmt = dbConnection.prepareStatement(query);
@@ -175,9 +301,32 @@ public class HelloController {
         }
     }
 
+    // Method to load Managers from the database and populate the manager list
+    private void loadUpdateManagers() {
+        updateManagerList.clear();
+        updateManagerList.add("All");
+        try {
+            String query = "SELECT employee_id, first_name, last_name FROM hr_employees order by 1 asc";
+            PreparedStatement stmt = dbConnection.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            // Process each player returned from the query
+            while (rs.next()) {
+                int employeeId = rs.getInt("employee_id");
+                String fullName = rs.getString("first_name") + " " + rs.getString("last_name");
+                updateManagerList.add(employeeId + " - " + fullName);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error in loading players: " + e.getMessage());
+        }
+    }
+
+
     // Method to load Departments from the database and populate the department list
     private void loadDepartments() {
-        departmentList.clear(); // Clear any existing data in the player list
+        departmentList.clear(); // Clear any existing data in the department list
         try {
             String query = "SELECT department_id, department_name FROM hr_departments order by 1 asc";
             PreparedStatement stmt = dbConnection.prepareStatement(query);
@@ -196,11 +345,31 @@ public class HelloController {
         }
     }
 
-    // Handles the registration of a new player
+    // Method to load Departments from the database and populate the department list
+    private void loadUpdateDepartments() {
+        updateDepartmentList.clear();
+        updateDepartmentList.add("All");
+        try {
+            String query = "SELECT department_id, department_name FROM hr_departments order by 1 asc";
+            PreparedStatement stmt = dbConnection.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            // Process each player returned from the query
+            while (rs.next()) {
+                int departmentId = rs.getInt("department_id");
+                String departmentName = rs.getString("department_name") ;
+                updateDepartmentList.add(departmentId + " - " + departmentName);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error in loading players: " + e.getMessage());
+        }
+    }
+
     @FXML
     private void onSubmitHireEmployeeForm(ActionEvent event) {
         try {
-
             // Check if required fields are empty
             if (registerFirstNameField.getText().isEmpty()) {
                 showError("First Name is required.");
@@ -214,10 +383,10 @@ public class HelloController {
                 showError("Email is required.");
                 return;
             }
-            if (registerPhoneNumberField.getText().isEmpty()) {
-                showError("Phone Number is required.");
-                return;
-            }
+//            if (registerPhoneNumberField.getText().isEmpty()) {
+//                showError("Phone Number is required.");
+//                return;
+//            }
             if (registerHireDatePicker.getValue() == null) {
                 showError("Hire Date is required.");
                 return;
@@ -227,19 +396,15 @@ public class HelloController {
                 return;
             }
 
-
-
             String selectedJob = employeeJobComboBox.getValue();
-            String selectedManager =  employeeManagerComboBox.getValue();
-            String selectedDepartment =  employeeDepartmentComboBox.getValue();
-
+            String selectedManager = employeeManagerComboBox.getValue();
+            String selectedDepartment = employeeDepartmentComboBox.getValue();
 
             // Validate the selected Job from the ComboBox
             if (selectedJob == null || selectedJob.isEmpty()) {
                 showError("Please select a Job to register the new Employee.");
                 return;
             }
-
 
             // Validate the selected Manager from the ComboBox
             if (selectedManager == null || selectedManager.isEmpty()) {
@@ -257,38 +422,41 @@ public class HelloController {
             int selectedManagerId = extractManagerIdFromComboBox(selectedManager);
             int selectedDepartmentId = extractDepartmentIdFromComboBox(selectedDepartment);
 
-
             // Convert LocalDate from DatePicker to java.sql.Date
             LocalDate hireDate = registerHireDatePicker.getValue();
             java.sql.Date sqlDate = java.sql.Date.valueOf(hireDate);
 
-            // Prepare SQL query to insert new player into the database
-            String query = "INSERT INTO hr_employees (first_name, last_name, email, phone_number, hire_date, job_id,salary, manager_id,department_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?,?,?,?)";
-            PreparedStatement stmt = dbConnection.prepareStatement(query);
+            // Call the stored procedure to insert the new employee
+            String callQuery = "{call Employee_hire_sp(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+            CallableStatement stmt = dbConnection.prepareCall(callQuery);
 
-            // Set query parameters from user input
-            stmt.setString(1, registerFirstNameField.getText());
-            stmt.setString(2, registerLastNameField.getText());
-            stmt.setString(3, registerEmailField.getText());
-            stmt.setString(4, registerPhoneNumberField.getText());
-            stmt.setDate(5, sqlDate);
-            stmt.setString(6, selectedJobId );
-            stmt.setInt(7, Integer.parseInt(registerSalaryField.getText()));
-            stmt.setInt(8, selectedManagerId);
-            stmt.setInt(9, selectedDepartmentId);
-            // Execute the query
+            // Set the parameters for the stored procedure
+            stmt.setString(1, registerFirstNameField.getText());  // p_first_name
+            stmt.setString(2, registerLastNameField.getText());   // p_last_name
+            stmt.setString(3, registerEmailField.getText());      // p_email
+            stmt.setInt(4, Integer.parseInt(registerSalaryField.getText()));  // p_salary
+            stmt.setDate(5, sqlDate);  // p_hire_date
+            stmt.setString(6, registerPhoneNumberField.getText());  // p_phone
+            stmt.setString(7, selectedJobId);  // p_job_id
+            stmt.setInt(8, selectedManagerId);  // p_manager_id
+            stmt.setInt(9, selectedDepartmentId);  // p_department_id
+
+            // Execute the stored procedure
             stmt.executeUpdate();
+
+            // Show success message
             showMessage("Employee registered successfully.");
 
-            // Clear input fields and refresh the player list
+            // Clear input fields and refresh the manager list
             clearHireEmployeeForm();
             loadManagers(); // Refresh Manager list
+            loadUpdateManagers();
         } catch (SQLException e) {
             e.printStackTrace();
             showError("SQL Error in registering player: " + e.getMessage());
         }
     }
+
 
     // Cancel the Hire Employee form
     @FXML
@@ -311,10 +479,16 @@ public class HelloController {
         registerEmailField.clear();
         registerPhoneNumberField.clear();
         registerSalaryField.clear();
-        registerHireDatePicker.setValue(null);
+        registerHireDatePicker.setValue(LocalDate.now());
         employeeJobComboBox.getSelectionModel().clearSelection();
         employeeManagerComboBox.getSelectionModel().clearSelection();
         employeeDepartmentComboBox.getSelectionModel().clearSelection();
+
+        // Set the prompt text explicitly after clearing
+        employeeJobComboBox.setPromptText("Please select ...");
+        employeeManagerComboBox.setPromptText("Please select ...");
+        employeeDepartmentComboBox.setPromptText("Please select ...");
+
     }
 
 
@@ -342,7 +516,6 @@ public class HelloController {
     @FXML
     private void onSubmitJobForm(ActionEvent event) {
         try {
-
             // Check if the job id field is empty
             if (registerJobIdField.getText().isEmpty()) {
                 showError("Job ID is required.");
@@ -361,33 +534,41 @@ public class HelloController {
                 return;
             }
 
-            // Check if the Max Salary field is empty
-            if (registerMaxSalaryField.getText().isEmpty()) {
-                showError("Max Salary is required.");
-                return;
+            // Prepare the min salary and max salary variables
+            int minSalary = Integer.parseInt(registerMinSalaryField.getText());
+            Integer maxSalary = null;
+            if (!registerMaxSalaryField.getText().isEmpty()) {
+                maxSalary = Integer.parseInt(registerMaxSalaryField.getText());
             }
 
-            // Prepare SQL query to insert new game into the database
-            String query = "INSERT INTO hr_jobs (job_id, job_title, min_salary, max_salary) " +
-                    "VALUES (?,?,?,?)";
-            PreparedStatement stmt = dbConnection.prepareStatement(query);
-            stmt.setString(1, registerJobIdField.getText());
-            stmt.setString(2, registerJobTitleField.getText());
-            stmt.setInt(3, Integer.parseInt(registerMinSalaryField.getText()));
-            stmt.setInt(4, Integer.parseInt(registerMaxSalaryField.getText()));
+            // Prepare SQL query to call the stored procedure
+            String query = "{ CALL new_job(?, ?, ?, ?) }";
+            CallableStatement stmt = dbConnection.prepareCall(query);
 
-            // Execute the query
+            // Set input parameters for the procedure
+            stmt.setString(1, registerJobIdField.getText());  // job_id
+            stmt.setString(2, registerJobTitleField.getText()); // job_title
+            stmt.setInt(3, minSalary); // min_salary
+            if (maxSalary != null) {
+                stmt.setInt(4, maxSalary); // max_salary (input value)
+            } else {
+                stmt.setNull(4, java.sql.Types.INTEGER); // Set NULL if max salary is not provided
+            }
+
+            // Execute the stored procedure
             stmt.executeUpdate();
             showMessage("Job registered successfully.");
 
-            // Clear input fields and refresh the game list
+            // Clear input fields and refresh the job list
             clearJobForm();
-            loadJobs(); // Refresh player list
+            loadJobs(); // Refresh job list
+            loadUpdateJobs();
         } catch (SQLException e) {
             e.printStackTrace();
             showError("SQL Error in registering job: " + e.getMessage());
         }
     }
+
 
 
     // Clears the input fields in the Job form
@@ -452,8 +633,23 @@ public class HelloController {
 
     @FXML
     public void onEmployeesListTabSelected() {
+
         // Clear previous data in the employeeTable
         employeeTable.getItems().clear();
+
+        // Reset ComboBoxes to their prompt state
+        updateJobComboBox.getSelectionModel().clearSelection();
+        updateJobComboBox.setPromptText("Please select ...");
+
+        updateManagerComboBox.getSelectionModel().clearSelection();
+        updateManagerComboBox.setPromptText("Please select ...");
+
+        updateDepartmentComboBox.getSelectionModel().clearSelection();
+        updateDepartmentComboBox.setPromptText("Please select ...");
+
+        // Clear the text fields
+        filterEmployeeIdField.clear();
+        updateSalaryField.clear();
 
         // SQL query to fetch all employee details
         String query = "SELECT " +
@@ -507,6 +703,116 @@ public class HelloController {
             showError("SQL Error in fetching employee data: " + e.getMessage());
         }
     }
+
+    @FXML
+    private void onJobSelection(ActionEvent event) {
+        filterEmployeesTable();
+    }
+
+    @FXML
+    private void onManagerSelection(ActionEvent event) {
+        filterEmployeesTable();
+    }
+
+    @FXML
+    private void onDepartmentSelection(ActionEvent event) {
+        filterEmployeesTable();
+    }
+
+    private void filterEmployeesTable() {
+        String selectedJob = updateJobComboBox.getValue();
+        String selectedManager = updateManagerComboBox.getValue();
+        String selectedDepartment = updateDepartmentComboBox.getValue();
+
+        StringBuilder queryBuilder = new StringBuilder("SELECT " +
+                "a.Employee_id, a.first_name, a.last_name, a.email, a.phone_Number, " +
+                "a.Hire_Date, c.job_title, a.salary, " +
+                "(SELECT first_name || ' ' || last_name FROM hr_employees WHERE employee_id = a.manager_id) AS \"MANAGER\", " +
+                "b.department_name AS \"Department\" " +
+                "FROM hr_employees a " +
+                "JOIN hr_departments b ON a.department_id = b.department_id " +
+                "JOIN hr_jobs c ON a.job_id = c.job_id ");
+
+        boolean hasCondition = false;
+
+        if (selectedJob != null && !"All".equals(selectedJob)) {
+            queryBuilder.append(hasCondition ? " AND " : " WHERE ").append("a.job_id = ?");
+            hasCondition = true;
+        }
+
+        if (selectedManager != null && !"All".equals(selectedManager)) {
+            queryBuilder.append(hasCondition ? " AND " : " WHERE ").append("a.manager_id = ?");
+            hasCondition = true;
+        }
+
+        if (selectedDepartment != null && !"All".equals(selectedDepartment)) {
+            queryBuilder.append(hasCondition ? " AND " : " WHERE ").append("a.department_id = ?");
+        }
+
+        queryBuilder.append(" ORDER BY a.Employee_id ASC");
+
+        try (PreparedStatement stmt = dbConnection.prepareStatement(queryBuilder.toString())) {
+            int paramIndex = 1;
+
+            if (selectedJob != null && !"All".equals(selectedJob)) {
+                stmt.setString(paramIndex++, extractJobIdFromComboBox(selectedJob));
+            }
+
+            if (selectedManager != null && !"All".equals(selectedManager)) {
+                stmt.setInt(paramIndex++, extractManagerIdFromComboBox(selectedManager));
+            }
+
+            if (selectedDepartment != null && !"All".equals(selectedDepartment)) {
+                stmt.setInt(paramIndex++, extractDepartmentIdFromComboBox(selectedDepartment));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                ObservableList<Employee> filteredEmployees = FXCollections.observableArrayList();
+
+                while (rs.next()) {
+                    Employee employee = new Employee(
+                            rs.getInt("Employee_id"),
+                            rs.getString("first_name"),
+                            rs.getString("last_name"),
+                            rs.getString("email"),
+                            rs.getString("phone_Number"),
+                            rs.getDate("Hire_Date"),
+                            rs.getString("job_title"),
+                            rs.getInt("salary"),
+                            rs.getString("MANAGER"),
+                            rs.getString("Department")
+                    );
+                    filteredEmployees.add(employee);
+                }
+
+                employeeTable.setItems(filteredEmployees);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error filtering employees: " + e.getMessage());
+        }
+    }
+
+
+    private void updateDatabaseEmployeesTable(String columnName, Object newValue, int employeeId) {
+        String query = "UPDATE hr_employees SET " + columnName + " = ? WHERE Employee_id = ?";
+
+        try (PreparedStatement stmt = dbConnection.prepareStatement(query)) {
+            stmt.setObject(1, newValue);  // Set the new value
+            stmt.setInt(2, employeeId);  // Set the Employee ID
+
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println(columnName + " updated successfully for Employee ID " + employeeId);
+            } else {
+                showError("Failed to update " + columnName + " for Employee ID " + employeeId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error while updating " + columnName + ": " + e.getMessage());
+        }
+    }
+
 
     @FXML
     public void onFilterEmployee() {
@@ -580,6 +886,62 @@ public class HelloController {
             showError("SQL Error in filtering employee data: " + e.getMessage());
         }
     }
+
+    @FXML
+    public void onUpdateSalary() {
+        // Get the new salary value from the text field
+        String newSalaryStr = updateSalaryField.getText();
+
+        // Validate input
+        if (newSalaryStr == null || newSalaryStr.trim().isEmpty()) {
+            showError("Please enter a valid salary.");
+            return;
+        }
+
+        int newSalary;
+        try {
+            newSalary = Integer.parseInt(newSalaryStr);
+        } catch (NumberFormatException e) {
+            showError("Invalid salary format. Please enter a numeric value.");
+            return;
+        }
+
+        // Check if there are employees in the table
+        ObservableList<Employee> employees = employeeTable.getItems();
+        if (employees.isEmpty()) {
+            showError("No employees to update. Please filter the table first.");
+            return;
+        }
+
+        // Prepare the SQL update statement
+        String updateQuery = "UPDATE hr_employees SET salary = ? WHERE employee_id = ?";
+
+        try (PreparedStatement stmt = dbConnection.prepareStatement(updateQuery)) {
+            for (Employee employee : employees) {
+                // Set parameters for the prepared statement
+                stmt.setInt(1, newSalary); // New salary
+                stmt.setInt(2, employee.getEmployeeId()); // Employee ID
+                stmt.addBatch(); // Add to batch for efficient execution
+            }
+
+            // Execute batch update
+            int[] updateCounts = stmt.executeBatch();
+
+            // Display success message
+            int updatedRows = Arrays.stream(updateCounts).sum();
+            showMessage(updatedRows + " employees' salaries updated successfully.");
+
+            // Refresh the table to reflect changes
+            filterEmployeesTable();
+            updateSalaryField.clear();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error while updating salaries: " + e.getMessage());
+        }
+    }
+
 
     @FXML
     public void onFilterEmployeeRestart() {
@@ -675,6 +1037,19 @@ public class HelloController {
             // Handle SQL exceptions
             e.printStackTrace();
             showError("SQL Error in fetching jobs data: " + e.getMessage());
+        }
+    }
+
+
+    private void updateDatabaseJobsTable(String columnName, Object newValue, String jobId) {
+        String query = "UPDATE hr_jobs SET " + columnName + " = ? WHERE job_id = ?";
+        try (PreparedStatement stmt = dbConnection.prepareStatement(query)) {
+            stmt.setObject(1, newValue);
+            stmt.setString(2, jobId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error while updating job: " + e.getMessage());
         }
     }
 

@@ -80,7 +80,23 @@
                 <Button text="Filter" onAction="#onFilterEmployee" />
                 <Button text="Restart" onAction="#onFilterEmployeeRestart" />
             </HBox>
-            <TableView fx:id="employeeTable">
+
+            <HBox spacing="10" alignment="BASELINE_CENTER">
+                <Label text="Job:" style="-fx-font-weight: bold;" />
+                <ComboBox fx:id="updateJobComboBox" prefWidth="200"  promptText="Please select ..." onAction="#onJobSelection" />
+                <Label text="Manager:" style="-fx-font-weight: bold;" />
+                <ComboBox fx:id="updateManagerComboBox" prefWidth="200"  promptText="Please select ..."  onAction="#onManagerSelection"/>
+                <Label text="Department:" style="-fx-font-weight: bold;" />
+                <ComboBox fx:id="updateDepartmentComboBox" prefWidth="200"  promptText="Please select ..." onAction="#onDepartmentSelection"/>
+            </HBox>
+
+            <HBox spacing="10">
+                <Label text="New Salary:" />
+                <TextField fx:id="updateSalaryField" promptText="Enter New Salary" />
+                <Button text="Update" onAction="#onUpdateSalary" />
+            </HBox>
+
+            <TableView fx:id="employeeTable" editable="true">
                 <columns>
                     <TableColumn text="Employee ID" fx:id="employeeIdColumn" prefWidth="100" />
                     <TableColumn text="First Name" fx:id="firstNameColumn" prefWidth="150"/>
@@ -94,7 +110,15 @@
                     <TableColumn text="Department" fx:id="departmentColumn" prefWidth="150" />
                 </columns>
             </TableView>
+
+            <Separator />
+
+            <HBox spacing="10" alignment="BASELINE_CENTER">
+                <Button text="Cancel" onAction="#onCancelHireEmployeeForm"/>
+            </HBox>
+
         </VBox>
+
     </Tab>
 
 
@@ -131,6 +155,7 @@
             <HBox spacing="10" alignment="CENTER">
                 <Button text="Register" onAction="#onSubmitJobForm"/>
                 <Button text="Clear" onAction="#onClearJobForm"/>
+                <Button text="Cancel" onAction="#onCancelHireEmployeeForm"/>
             </HBox>
         </VBox>
     </Tab>
@@ -153,6 +178,13 @@
                 <Label text="Job Description:" />
                 <TextField fx:id="jobDescriptionField" editable="false"  />
             </HBox>
+
+            <Separator />
+
+            <HBox spacing="10" alignment="BASELINE_CENTER">
+                <Button text="Cancel" onAction="#onCancelHireEmployeeForm"/>
+            </HBox>
+
         </VBox>
     </Tab>
 
@@ -170,7 +202,7 @@
                 <Button text="Filter" onAction="#onFilterJob" />
                 <Button text="Restart" onAction="#onFilterJobRestart" />
             </HBox>
-            <TableView fx:id="jobsTable">
+            <TableView fx:id="jobsTable" editable="true">
                 <columns>
                     <TableColumn text="Job ID" fx:id="jobIdColumn" prefWidth="200" />
                     <TableColumn text="Job Title" fx:id="jobTitleColumn" prefWidth="310"/>
@@ -178,6 +210,13 @@
                     <TableColumn text="Max Salary" fx:id="maxSalaryColumn" prefWidth="150"/>
                 </columns>
             </TableView>
+
+            <Separator />
+
+            <HBox spacing="10" alignment="BASELINE_CENTER">
+                <Button text="Cancel" onAction="#onCancelHireEmployeeForm"/>
+            </HBox>
+
         </VBox>
     </Tab>
 
