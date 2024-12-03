@@ -148,8 +148,6 @@
                 <TextField fx:id="registerJobTitleField" promptText="Enter Job title" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
                 <Label text="Min Salary:" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0" />
                 <TextField fx:id="registerMinSalaryField" promptText="Enter Job Min Salary" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                <Label text="Max Salary:" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-                <TextField fx:id="registerMaxSalaryField" promptText="Enter Job Max Salary" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
             </GridPane>
 
             <HBox spacing="10" alignment="CENTER">

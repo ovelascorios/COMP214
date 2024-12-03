@@ -28,7 +28,8 @@ public class HelloApplication extends Application {
 
     //Utility class for database connection.
     public static class DatabaseConnector {
-        private static final String URL = "jdbc:oracle:thin:@199.212.26.208:1521:SQLD";
+        private static final String URL = "jdbc:oracle:thin:@199.212.26.208:1521:SQLD";  //Remote conexion
+        //private static final String URL = "jdbc:oracle:thin:@oracle1.centennialcollege.ca:1521:SQLD"; // Centennial conexion
         private static final String USER = "COMP214_F24_er_28";
         private static final String PASSWORD = "password";
 

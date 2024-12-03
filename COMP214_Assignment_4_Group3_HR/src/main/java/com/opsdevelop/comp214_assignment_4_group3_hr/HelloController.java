@@ -47,7 +47,7 @@ public class HelloController {
     private TextField updateSalaryField;
 
     @FXML
-    private TextField registerJobIdField, registerJobTitleField, registerMinSalaryField, registerMaxSalaryField;
+    private TextField registerJobIdField, registerJobTitleField, registerMinSalaryField;
 
     @FXML
     private TextField jobIdField,jobDescriptionField, filterJobIdField;
@@ -536,24 +536,15 @@ public class HelloController {
 
             // Prepare the min salary and max salary variables
             int minSalary = Integer.parseInt(registerMinSalaryField.getText());
-            Integer maxSalary = null;
-            if (!registerMaxSalaryField.getText().isEmpty()) {
-                maxSalary = Integer.parseInt(registerMaxSalaryField.getText());
-            }
 
             // Prepare SQL query to call the stored procedure
-            String query = "{ CALL new_job(?, ?, ?, ?) }";
+            String query = "{ CALL new_job(?, ?, ?) }";
             CallableStatement stmt = dbConnection.prepareCall(query);
 
             // Set input parameters for the procedure
             stmt.setString(1, registerJobIdField.getText());  // job_id
             stmt.setString(2, registerJobTitleField.getText()); // job_title
             stmt.setInt(3, minSalary); // min_salary
-            if (maxSalary != null) {
-                stmt.setInt(4, maxSalary); // max_salary (input value)
-            } else {
-                stmt.setNull(4, java.sql.Types.INTEGER); // Set NULL if max salary is not provided
-            }
 
             // Execute the stored procedure
             stmt.executeUpdate();
@@ -584,7 +575,6 @@ public class HelloController {
         registerJobIdField.clear();
         registerJobTitleField.clear();
         registerMinSalaryField.clear();
-        registerMaxSalaryField.clear();
     }
 
 
