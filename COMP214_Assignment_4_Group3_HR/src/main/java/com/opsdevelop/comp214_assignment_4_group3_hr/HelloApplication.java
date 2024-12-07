@@ -1,14 +1,10 @@
 /*
   File Name: HelloApplication.java
-  Description: A JavaFX application that displays player game information
-               by connecting to an Oracle database via JDBC. It retrieves
-               and manages data such as player names, game titles, dates,
-               and scores. The UI is managed using an FXML file, and the
-               application tests the database connection at startup before
-               launching.
-  Student's Name: Orlando Velasco Rios
-  Student ID: 301368612
-  Date: November 30, 2024
+  Description: This class serves as the main entry point for a JavaFX-based Human Resources application.
+               It includes methods for initializing the graphical user interface (GUI) and
+               connecting to an Oracle database for backend operations.
+  Group Number: 03
+  Date: December 8, 2024
 */
 
 

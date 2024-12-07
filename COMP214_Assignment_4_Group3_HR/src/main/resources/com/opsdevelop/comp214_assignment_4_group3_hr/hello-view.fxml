@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  File Name: HelloApplication.fxml
+  Description: This FXML file defines the layout for the main user interface of the JavaFX Human Resources application.
+               It includes elements for displaying employee information, buttons for CRUD operations,
+               and connects with the backend Java classes for data management.
+  Group Number: 03
+  Date: December 8, 2024
+-->
+
+
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -76,7 +86,7 @@
             </padding>
             <HBox spacing="10">
                 <Label text="Filter by Employee ID:" />
-                <TextField fx:id="filterEmployeeIdField" promptText="Enter Player ID" />
+                <TextField fx:id="filterEmployeeIdField" promptText="Enter Employee ID" />
                 <Button text="Filter" onAction="#onFilterEmployee" />
                 <Button text="Restart" onAction="#onFilterEmployeeRestart" />
             </HBox>
@@ -196,7 +206,7 @@
             </padding>
             <HBox spacing="10">
                 <Label text="Filter by Job ID:" />
-                <TextField fx:id="filterJobIdField" promptText="Enter Player ID" />
+                <TextField fx:id="filterJobIdField" promptText="Enter Job ID" />
                 <Button text="Filter" onAction="#onFilterJob" />
                 <Button text="Restart" onAction="#onFilterJobRestart" />
             </HBox>
@@ -206,6 +216,81 @@
                     <TableColumn text="Job Title" fx:id="jobTitleColumn" prefWidth="310"/>
                     <TableColumn text="Min Salary" fx:id="minSalaryColumn" prefWidth="150" />
                     <TableColumn text="Max Salary" fx:id="maxSalaryColumn" prefWidth="150"/>
+                </columns>
+            </TableView>
+
+            <Separator />
+
+            <HBox spacing="10" alignment="BASELINE_CENTER">
+                <Button text="Cancel" onAction="#onCancelHireEmployeeForm"/>
+            </HBox>
+
+        </VBox>
+    </Tab>
+
+
+    <!-- Register department Tab -->
+    <Tab text="Department Register Form">
+        <VBox spacing="20" alignment="TOP_LEFT">
+
+            <padding>
+                <Insets left="20" right="20"  top="20" bottom="20"/>
+            </padding>
+
+            <GridPane alignment="TOP_CENTER" >
+                <Label text="DEPARTMENT REGISTER FORM" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            </GridPane>
+
+            <GridPane hgap="2" vgap="10" alignment="TOP_LEFT" >
+
+                <!-- Define width of each column as a percentage-->
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="80"/>
+                </columnConstraints>
+
+                <Label text="ID:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <TextField fx:id="registerDepartmentIdField" promptText="Enter Department ID" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="Department Name:" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <TextField fx:id="registerDepartmentNameField" promptText="Enter Department Name" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Manager ID:" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                <TextField fx:id="registerManagerID" promptText="Enter Manager ID" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                <Label text="Location ID:" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+                <TextField fx:id="registerLocationID" promptText="Enter Location ID" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+            </GridPane>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="Register" onAction="#onSubmitDepartmentForm"/>
+                <Button text="Clear" onAction="#onClearDepartmentForm"/>
+                <Button text="Cancel" onAction="#onCancelHireEmployeeForm"/>
+
+            </HBox>
+        </VBox>
+    </Tab>
+
+    <!-- Department List Tab -->
+    <Tab text="Department list" onSelectionChanged="#onDepartmentsListTabSelected">
+
+
+        <VBox spacing="20" alignment="TOP_LEFT">
+
+            <padding>
+                <Insets left="20" right="20"  top="20" bottom="20"/>
+            </padding>
+            <HBox spacing="10">
+                <Label text="Filter by Department ID:" />
+                <TextField fx:id="filterDepartmentIdField" promptText="Enter Department ID" />
+                <Button text="Filter" onAction="#onFilterDepartment" />
+                <Button text="Restart" onAction="#onFilterDepartmentRestart" />
+
+            </HBox>
+            <TableView fx:id="departmentsTable" editable="true">
+                <columns>
+                    <TableColumn text="Department ID" fx:id="departmentIdColumn" prefWidth="200" />
+                    <TableColumn text="Department Name" fx:id="departmentNameColumn" prefWidth="310"/>
+                    <TableColumn text="Manager ID" fx:id="ManagerID" prefWidth="150" />
+                    <TableColumn text="Location ID" fx:id="LocationID" prefWidth="150"/>
                 </columns>
             </TableView>
 

@@ -1,13 +1,15 @@
-package com.opsdevelop.comp214_assignment_4_group3_hr;
-
 /*
   File Name: HelloController.java
-  Description: A JavaFX controller class that manages a database-driven application
-               to register, update, and manage players, games, and scores.
-  Student's Name: Orlando Velasco Rios
-  Student ID: 301368612
-  Date: November 30, 2024
+  Description:   This JavaFX controller class is part of an HR management system.
+  It manages the interaction between the UI elements (such as forms and tables)
+  and the database, allowing users to view, filter, add, update, and delete records
+  related to employees, jobs, and departments. It also handles validation, updates,
+  and initialization for editable fields in the UI.
+  Group Number: 03
+  Date: December 8, 2024
 */
+
+package com.opsdevelop.comp214_assignment_4_group3_hr;
 
 // Import necessary libraries for handling JavaFX UI components, database operations, and date/time management
 import javafx.application.Platform;
@@ -28,8 +30,7 @@ import java.util.Arrays;
 
 public class HelloController {
 
-    // Required FXML fields
-
+    // UI controls for user input and interaction
 
     @FXML
     private TextField registerFirstNameField, registerLastNameField, registerEmailField, registerPhoneNumberField,registerSalaryField,filterEmployeeIdField;
@@ -37,12 +38,15 @@ public class HelloController {
     @FXML
     private DatePicker registerHireDatePicker;
 
+
+    // ComboBoxes for selecting job, manager, and department
     @FXML
     private ComboBox<String> employeeJobComboBox,employeeManagerComboBox,employeeDepartmentComboBox;
 
     @FXML
     private ComboBox<String> updateJobComboBox,updateManagerComboBox,updateDepartmentComboBox;
 
+    // Fields for job and department registration
     @FXML
     private TextField updateSalaryField;
 
@@ -52,6 +56,14 @@ public class HelloController {
     @FXML
     private TextField jobIdField,jobDescriptionField, filterJobIdField;
 
+    @FXML
+    private TextField registerDepartmentIdField, registerDepartmentNameField, registerManagerID, registerLocationID;
+
+    @FXML
+    private TextField filterDepartmentIdField, filterManagerID, filterLocationID;
+
+
+    // TableView and columns for displaying job information
     @FXML
     private TableView<Job> jobsTable;
     @FXML
@@ -63,6 +75,7 @@ public class HelloController {
     @FXML
     private TableColumn<Job, Integer> maxSalaryColumn;
 
+    // TableView and columns for displaying employee information
     @FXML
     private TableView<Employee> employeeTable;
     @FXML
@@ -86,7 +99,19 @@ public class HelloController {
     @FXML
     private TableColumn<Employee, String> departmentColumn;
 
-    // Connection object to interact with the database
+    // TableView and columns for displaying department information
+    @FXML
+    private TableView<Department> departmentsTable;
+    @FXML
+    private TableColumn<Department, Integer> departmentIdColumn;
+    @FXML
+    private TableColumn<Department, String> departmentNameColumn;
+    @FXML
+    private TableColumn<Department, Integer> ManagerID;
+    @FXML
+    private TableColumn<Department, Integer> LocationID;
+
+    // Connection to interact with the database
     private Connection dbConnection;
 
 
@@ -111,16 +136,22 @@ public class HelloController {
         }
     }
 
-    // Initialize method: Called when the controller is loaded to set up components
+    /*
+     * Initialize method:
+     * Sets up the UI elements and loads data into tables and combo boxes.
+     * Called automatically when the controller is loaded.
+     */
     @FXML
     public void initialize() {
-        // Load Jobs, Managers and Departments into the lists
+        // Load Jobs, Managers and Departments data into ComboBoxes for both registration and updates
         loadJobs();
         loadManagers();
         loadDepartments();
         loadUpdateJobs();
         loadUpdateManagers();
         loadUpdateDepartments();
+
+        // Pre-fill the date picker with today's date
         registerHireDatePicker.setValue(LocalDate.now());
 
         // Set the items for combo boxes using the loaded lists
@@ -150,6 +181,11 @@ public class HelloController {
         jobTitleColumn.setCellValueFactory(new PropertyValueFactory<>("jobTitle"));
         minSalaryColumn.setCellValueFactory(new PropertyValueFactory<>("minSalary"));
         maxSalaryColumn.setCellValueFactory(new PropertyValueFactory<>("maxSalary"));
+        departmentIdColumn.setCellValueFactory(new PropertyValueFactory<>("departmentId"));
+        departmentNameColumn.setCellValueFactory(new PropertyValueFactory<>("departmentName"));
+        ManagerID.setCellValueFactory(new PropertyValueFactory<>("managerId"));
+        LocationID.setCellValueFactory(new PropertyValueFactory<>("locationId"));
+
 
         // Make the SALARY column editable
         salaryColumn.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
@@ -235,9 +271,52 @@ public class HelloController {
             updateDatabaseJobsTable("max_salary", newMaxSalary, jobId);
         });
 
+
+        // Make DEPARTMENT_NAME column editable
+        departmentNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        departmentNameColumn.setOnEditCommit(event -> {
+            Department department = event.getRowValue();
+            String newTitle = event.getNewValue();
+            Integer departmentId = department.getDepartmentId();
+
+            // Update the model
+            department.setDepartmentName(newTitle);
+
+            // Update the database
+            updateDatabaseDepartmentTable("DEPARTMENT_NAME", newTitle, departmentId);
+        });
+
+        // Make MANAGER_ID column editable
+        ManagerID.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        ManagerID.setOnEditCommit(event -> {
+            Department department = event.getRowValue();
+            int ManagerID = event.getNewValue();
+            Integer departmentId = department.getDepartmentId();
+
+            // Update the model
+            department.setManagerId(ManagerID);
+
+            // Update the database
+            updateDatabaseDepartmentTable("MANAGER_ID", ManagerID, departmentId);
+        });
+
+        // Make MAX_SALARY column editable
+        LocationID.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        LocationID.setOnEditCommit(event -> {
+            Department department = event.getRowValue();
+            int LocationID = event.getNewValue();
+            Integer departmentId = department.getDepartmentId();
+
+            // Update the model
+            department.setLocationId(LocationID);
+
+            // Update the database
+            updateDatabaseDepartmentTable("LOCATION_ID", LocationID, departmentId);
+        });
+
     }
 
-    // Method to load Jobs from the database and populate the job list
+    // Method to load Jobs from the database and populate the job list in Hire employee form tab
     private void loadJobs() {
         jobList.clear(); // Clear any existing data in the job list
         try {
@@ -245,7 +324,7 @@ public class HelloController {
             PreparedStatement stmt = dbConnection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            // Process each player returned from the query
+            // Process each job returned from the query
             while (rs.next()) {
                 String jobId = rs.getString("job_id");
                 String jobTitle = rs.getString("job_title") ;
@@ -253,12 +332,12 @@ public class HelloController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("SQL Error in loading players: " + e.getMessage());
+            showError("SQL Error in loading jobs: " + e.getMessage());
         }
     }
 
 
-    // Method to load Jobs from the database and populate the job list
+    // Method to load Jobs from the database and populate the job list in Employee List tab
     private void loadUpdateJobs() {
         updateJobList.clear();
         updateJobList.add("All");
@@ -267,7 +346,7 @@ public class HelloController {
             PreparedStatement stmt = dbConnection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            // Process each player returned from the query
+            // Process each job returned from the query
             while (rs.next()) {
                 String jobId = rs.getString("job_id");
                 String jobTitle = rs.getString("job_title") ;
@@ -275,12 +354,12 @@ public class HelloController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("SQL Error in loading players: " + e.getMessage());
+            showError("SQL Error in loading jobs: " + e.getMessage());
         }
     }
 
 
-    // Method to load Managers from the database and populate the manager list
+    // Method to load Managers from the database and populate the manager list in Hire employee form tab
     private void loadManagers() {
         managerList.clear(); // Clear any existing data in the manager list
         try {
@@ -288,7 +367,7 @@ public class HelloController {
             PreparedStatement stmt = dbConnection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            // Process each player returned from the query
+            // Process each managers returned from the query
             while (rs.next()) {
                 int employeeId = rs.getInt("employee_id");
                 String fullName = rs.getString("first_name") + " " + rs.getString("last_name");
@@ -297,11 +376,11 @@ public class HelloController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("SQL Error in loading players: " + e.getMessage());
+            showError("SQL Error in loading managers: " + e.getMessage());
         }
     }
 
-    // Method to load Managers from the database and populate the manager list
+    // Method to load Managers from the database and populate the manager list in Employee List tab
     private void loadUpdateManagers() {
         updateManagerList.clear();
         updateManagerList.add("All");
@@ -310,7 +389,7 @@ public class HelloController {
             PreparedStatement stmt = dbConnection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            // Process each player returned from the query
+            // Process each manager returned from the query
             while (rs.next()) {
                 int employeeId = rs.getInt("employee_id");
                 String fullName = rs.getString("first_name") + " " + rs.getString("last_name");
@@ -319,12 +398,12 @@ public class HelloController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("SQL Error in loading players: " + e.getMessage());
+            showError("SQL Error in loading managers: " + e.getMessage());
         }
     }
 
 
-    // Method to load Departments from the database and populate the department list
+    // Method to load Departments from the database and populate the department list in Hire employee form tab
     private void loadDepartments() {
         departmentList.clear(); // Clear any existing data in the department list
         try {
@@ -332,7 +411,7 @@ public class HelloController {
             PreparedStatement stmt = dbConnection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            // Process each player returned from the query
+            // Process each department returned from the query
             while (rs.next()) {
                 int departmentId = rs.getInt("department_id");
                 String departmentName = rs.getString("department_name") ;
@@ -341,11 +420,11 @@ public class HelloController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("SQL Error in loading players: " + e.getMessage());
+            showError("SQL Error in loading departments: " + e.getMessage());
         }
     }
 
-    // Method to load Departments from the database and populate the department list
+    // Method to load Departments from the database and populate the department list in Employee List tab
     private void loadUpdateDepartments() {
         updateDepartmentList.clear();
         updateDepartmentList.add("All");
@@ -354,7 +433,7 @@ public class HelloController {
             PreparedStatement stmt = dbConnection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            // Process each player returned from the query
+            // Process each departments returned from the query
             while (rs.next()) {
                 int departmentId = rs.getInt("department_id");
                 String departmentName = rs.getString("department_name") ;
@@ -363,7 +442,7 @@ public class HelloController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("SQL Error in loading players: " + e.getMessage());
+            showError("SQL Error in loading departments: " + e.getMessage());
         }
     }
 
@@ -453,7 +532,7 @@ public class HelloController {
             loadUpdateManagers();
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("SQL Error in registering player: " + e.getMessage());
+            showError("SQL Error in registering Employee: " + e.getMessage());
         }
     }
 
@@ -1147,5 +1226,213 @@ public class HelloController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+
+    // Handles the registration of a new department
+    @FXML
+    private void onSubmitDepartmentForm (ActionEvent event) {
+        try {
+            // Check if the department id field is empty
+            if (registerDepartmentIdField.getText().isEmpty()) {
+                showError("Department ID is required.");
+                return;
+            }
+
+            // Check if the department name field is empty
+            if (registerDepartmentNameField.getText().isEmpty()) {
+                showError("Department name is required.");
+                return;
+            }
+
+            // Check if the Manager ID field is empty
+            if (registerManagerID.getText().isEmpty()) {
+                showError("Manager ID  is required.");
+                return;
+            }
+
+            // Check if the Location ID field is empty
+            if (registerLocationID.getText().isEmpty()) {
+                showError("Location ID  is required.");
+                return;
+            }
+
+            // Prepare SQL query to call the stored procedure
+            String query = "{ CALL new_department(?, ?, ?, ?) }";
+            CallableStatement stmt = dbConnection.prepareCall(query);
+
+
+            // Set input parameters for the procedure
+            stmt.setString(1, registerDepartmentIdField.getText());  // department_id
+            stmt.setString(2, registerDepartmentNameField.getText()); // department_Name
+            stmt.setString(3, registerManagerID.getText()); // manager_ID
+            stmt.setString(4, registerLocationID.getText()); // local_ID
+
+
+            // Execute the stored procedure
+            stmt.executeUpdate();
+            showMessage("Department registered successfully.");
+
+            // Clear input fields and refresh the department list
+            loadDepartments(); // Refresh department list
+            onDepartmentForm();
+            //loadUpdateJobs();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error in registering department: " + e.getMessage());
+        }
+    }
+
+    // Clears the input fields in the department form
+    @FXML
+    private void onClearDepartmentForm(ActionEvent event) {
+
+        onDepartmentForm();
+    }
+
+    @FXML
+    private void onDepartmentForm() {
+        registerDepartmentIdField.clear();
+        registerDepartmentNameField.clear();
+        registerManagerID.clear();
+        registerLocationID.clear();
+    }
+
+    @FXML
+    public void onDepartmentsListTabSelected() {
+        // Clear previous data in the departmentsTable
+        departmentsTable.getItems().clear();
+
+        // SQL query to fetch all department details
+        String query = "SELECT DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID FROM hr_departments ORDER BY department_id ASC";
+
+        try (PreparedStatement stmt = dbConnection.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            // ObservableList to hold department data
+            ObservableList<Department> departments = FXCollections.observableArrayList();
+
+            // Process the result set
+            while (rs.next()) {
+                // Create a new Department object for each row
+                Department department = new Department(
+                        rs.getInt("department_id"),
+                        rs.getString("department_name"),
+                        rs.getInt("manager_id"),
+                        rs.getInt("location_id")
+                );
+                departments.add(department); // Add the Department object to the list
+            }
+
+            // Populate the departmentsTable with the retrieved department data
+            departmentsTable.setItems(departments);
+
+        } catch (SQLException e) {
+            // Handle SQL exceptions
+            e.printStackTrace();
+            showError("SQL Error in fetching departments data: " + e.getMessage());
+        }
+    }
+
+
+    @FXML
+    public void onFilterDepartment() {
+        // Clear previous data in the departmentsTable
+        departmentsTable.getItems().clear();
+
+        // Get the Department ID from the filter field
+        String departmentIdInput = filterDepartmentIdField.getText().trim();
+
+        // Validate the input
+        if (departmentIdInput.isEmpty()) {
+            showError("Please enter a Department ID to filter.");
+            return;
+        }
+
+        // SQL query to fetch department data for the specified Department ID
+        String query = "SELECT DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID FROM hr_departments WHERE department_id = ?";
+
+        try (PreparedStatement stmt = dbConnection.prepareStatement(query)) {
+            stmt.setString(1, departmentIdInput); // Set the department ID in the query
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                ObservableList<Department> departments = FXCollections.observableArrayList();
+                // Process the result set
+                while (rs.next()) {
+                    // Create a new Department object for each row
+                    Department department = new Department(
+                            rs.getInt("department_id"),
+                            rs.getString("department_name"),
+                            rs.getInt("manager_id"),
+                            rs.getInt("location_id")
+                    );
+                    departments.add(department);
+                }
+
+                // Handle the case where no departments are found
+                if (departments.isEmpty()) {
+                    showError("No department found with the given ID.");
+                } else {
+                    // Populate the departmentsTable with the filtered departments
+                    departmentsTable.setItems(departments);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error in filtering department data: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void onFilterDepartmentRestart() {
+        // Clear the filter input field
+        filterDepartmentIdField.clear();
+
+        // Clear previous data in the departmentsTable
+        departmentsTable.getItems().clear();
+
+        // SQL query to fetch all departments from the database
+        String query = "SELECT DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID FROM hr_departments ORDER BY department_id ASC";
+
+        try (PreparedStatement stmt = dbConnection.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            ObservableList<Department> departments = FXCollections.observableArrayList();
+
+            // Process the result set
+            while (rs.next()) {
+                Department department = new Department(
+                        rs.getInt("department_id"),
+                        rs.getString("department_name"),
+                        rs.getInt("manager_id"),
+                        rs.getInt("location_id")
+                );
+                departments.add(department);
+            }
+
+            // Populate the departmentsTable with all department
+            departmentsTable.setItems(departments);
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error in restarting the department filter: " + e.getMessage());
+        }
+    }
+
+
+    private void updateDatabaseDepartmentTable(String columnName, Object newValue, int departmentId) {
+        String query = "UPDATE hr_departments SET " + columnName + " = ? WHERE department_id = ?";
+        try (PreparedStatement stmt = dbConnection.prepareStatement(query)) {
+            stmt.setObject(1, newValue);
+            stmt.setInt(2, departmentId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("SQL Error while updating department: " + e.getMessage());
+        }
+    }
+
+
 }
 

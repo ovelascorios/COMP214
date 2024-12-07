@@ -1,9 +1,20 @@
+/*
+  File Name: Employee.java
+  Description: This class represents an Employee entity in an HR management system.
+               It includes fields for employee details such as ID, name, contact
+               information, job details, and managerial relationships. The class
+               provides a constructor for initializing employee data and getter/setter
+               methods for accessing and modifying employee information.
+  Group Number: 03
+  Date: December 8, 2024
+*/
+
 package com.opsdevelop.comp214_assignment_4_group3_hr;
 
 import java.sql.Date;
 
 public class Employee {
-    // Jobs information fields
+    // Employee information fields
     private int employeeId;
     private String firstName;
     private String lastName;
@@ -15,7 +26,7 @@ public class Employee {
     private String manager;
     private String department;
 
-    // Constructor to initialize a new Jobs object with all details
+    // Constructor to initialize a new Employee object with all details
     public Employee(int employeeId, String firstName, String lastName, String email, String phone,
                 Date hireDate,  String job, int salary, String manager, String department) {
         this.employeeId = employeeId;
